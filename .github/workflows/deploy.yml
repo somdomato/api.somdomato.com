@@ -1,0 +1,39 @@
+name: Node
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout site using Github Actions
+        uses: actions/checkout@v3
+      - name: Clone site using Github Actions
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASS }}
+          port: ${{ secrets.SSH_PORT }}
+          target: ${{ secrets.PROJECT_PATH }}
+          source: ./
+
+  Build:
+    needs: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Vite using pnpm
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASS }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ secrets.PROJECT_PATH }}
+            [ -f .env ] || cp .env.production .env
+            pnpm install
+            sudo /usr/bin/systemctl restart nodejs.service

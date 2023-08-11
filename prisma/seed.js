@@ -1,8 +1,17 @@
 import { PrismaClient } from '@prisma/client'
 import { glob } from 'glob'
 import NodeID3 from 'node-id3'
+import { realpathSync } from 'fs'
+// import { fileURLToPath } from 'url'
+// import { dirname, join } from 'path'
 
-const folderPath = 'songs'
+// const __filename = fileURLToPath(import.meta.url)
+// const __dirname = dirname(__filename)
+// const folderPath = join(__dirname, 'songs')
+// console.log(folderPath)
+
+const folderPath = realpathSync('./songs')
+console.log(folderPath)
 
 const prisma = new PrismaClient()
 
@@ -21,7 +30,7 @@ async function main() {
 
     if (!existingSong) {
       let existingArtist = await prisma.artist.findUnique({ where: { name: artistName } }) 
-      console.log(existingArtist)
+      // console.log(existingArtist)
 
       if (!existingArtist) existingArtist = await prisma.artist.create({ data: { name: artistName } })
  
